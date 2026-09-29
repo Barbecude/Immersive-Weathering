@@ -1,69 +1,69 @@
 plugins {
-    id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.6-SNAPSHOT" apply false
-    id "com.github.johnrengelman.shadow" version "7.1.2" apply false
-
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.gradle.userdev' version '7.0.192'
 }
 
-architectury {
-    minecraft = rootProject.minecraft_version
+version = mod_version
+group = mod_group_id
+
+repositories {
+    mavenLocal()
+    maven { url = 'https://maven.neoforged.net/releases' }
 }
 
-subprojects {
-    apply plugin: "dev.architectury.loom"
-    apply plugin: "com.github.johnrengelman.shadow"
+base {
+    archivesName = mod_id
+}
 
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-    loom {
-        silentMojangMappingsLicense()
+runs {
+    configureEach {
+        systemProperty 'forge.logging.markers', 'REGISTRIES'
+        systemProperty 'forge.logging.console.level', 'debug'
+        modSource project.sourceSets.main
     }
 
-    dependencies {
-        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+    client {
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+    }
 
-        mappings loom.layered() {
-
-            it.parchment("org.parchmentmc.data:parchment-${rootProject.parchment_version}")
-            it.officialMojangMappings {
-                setNameSyntheticMembers(false)
-            }
-        }
+    server {
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+        argument '--nogui'
     }
 }
 
-allprojects {
-    apply plugin: "java"
-    apply plugin: "architectury-plugin"
-    apply plugin: "maven-publish"
+dependencies {
+    implementation "net.neoforged:neoforge:${neo_version}"
+}
 
-    archivesBaseName = rootProject.mod_id
-    version = rootProject.mod_version
-    group = rootProject.maven_group
+tasks.withType(ProcessResources).configureEach {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors
+    ]
+    inputs.properties replaceProperties
 
-
-    repositories {
-
-        flatDir {
-            dirs 'mods'
-        }
-
-        mavenLocal()
-
-        maven { url "https://maven.parchmentmc.org" }
-
-        maven {
-            url = "https://www.cursemaven.com"
-            allowInsecureProtocol = true
-        }
-
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand replaceProperties
     }
+}
 
-    tasks.withType(JavaCompile) {
-        options.encoding = "UTF-8"
-        options.release = 17
-    }
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
 
-    java {
-        withSourcesJar()
-    }
+java {
+    withSourcesJar()
 }

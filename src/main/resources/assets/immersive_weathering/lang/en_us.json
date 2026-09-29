@@ -1,0 +1,9 @@
+{
+  "block.immersive_weathering.icicle": "Icicle",
+  "entity.immersive_weathering.falling_icicle": "Falling Icicle",
+  "subtitles.block.icicle.land": "Icicle crashes down",
+  "config.immersive_weathering.icicle.react_to_vibrations": "React to vibrations",
+  "config.immersive_weathering.icicle.spawn_rarity": "Icicle spawn rate",
+  "config.immersive_weathering.food.icicle_food": "Edible Icicle",
+  "config.immersive_weathering.food.icicle_fire_resistance": "Fire-res From Icicle"
+}
